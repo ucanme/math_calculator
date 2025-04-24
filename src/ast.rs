@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::f32::consts::E;
 use std::rc::Rc;
 use std::thread::sleep;
@@ -9,7 +10,6 @@ struct NumberAst {
     val: i64,
 }
 #[derive(Debug)]
-
 struct BinaryAst {
     op: String,
     left: Rc<AstNode>,
@@ -34,6 +34,7 @@ pub struct Ast<'a> {
     curr_tok: Option<&'a Token>, // 当前 token，使用引用并支持空值
     curr_idx: usize,           // 当前索引
     depth: i8,                 // 深度
+    priority_map: HashMap<String, i8>
 }
 
 impl<'a> Ast<'a> {
@@ -47,6 +48,13 @@ impl<'a> Ast<'a> {
             curr_tok: tokens.get(0), // 获取第一个 token 的引用
             curr_idx: 0,
             depth: 0,
+            priority_map: HashMap::from([
+                ("+".to_string(), 1),
+                ("-".to_string(), 1),
+                ("*".to_string(), 40),
+                ("/".to_string(), 40),
+                ("%".to_string(), 40),
+            ]),
         })
     }
 
@@ -54,42 +62,57 @@ impl<'a> Ast<'a> {
     pub fn parse_expression(&mut self) -> Result<Rc<AstNode>, CustomError> {
         self.depth+=1;
         let left = self.parse_primary();
-        let right = self.parse_op(left?);
-        println!("{:?}", right);
+        let right = self.parse_op(0,left?);
+        //println!("{:?}", right);
         right
     }
 
-    pub fn parse_op(&mut self,left: Rc<AstNode>)-> Result<Rc<AstNode>,CustomError>{
+    pub fn parse_op(&mut self,mut priority: i8,mut left:  Rc<AstNode>)-> Result<Rc<AstNode>,CustomError>{
+        loop{
+            println!("---left--- {:?}", left);
         let op = self.curr_tok;
         match op {
             Some(token) => {
                 match token.tok_type {
                     TokenType::OPERATOR => {
+                        let cur_priority = self.priority_map.get(&token.tok).ok_or(CustomError::InvalidSyntax)?;
+                        if cur_priority < &priority {
+                            return Ok(left);
+                        }
                         self.curr_idx += 1;
                         self.curr_tok = self.tokens.get(self.curr_idx);
-                        let right = self.parse_primary();
-                        let binary = BinaryAst {
-                            op: token.tok.clone(),
-                            left: left,
-                            right: right?,
-                        };
-                        if self.curr_idx < self.tokens.len(){
-                            return self.parse_op(Rc::new(AstNode::Binary(binary)));
-                        }
+                        let mut right  = self.parse_primary()?;
 
-                        Ok(Rc::new(AstNode::Binary(binary)))
+                        let cur_priority = self.priority_map.get(&token.tok).ok_or(CustomError::InvalidSyntax)?;
+                        let next_priority = self.priority_map.get(&self.curr_tok.ok_or(CustomError::InvalidSyntax)?.tok).ok_or(CustomError::InvalidSyntax)?;
+
+                        println!("1 cur:{:?}",cur_priority);
+                        println!("2 next:{:?}", next_priority);
+                        println!("right {:?}", right);
+                        if cur_priority < next_priority {
+                            right = self.parse_op(cur_priority+1,right)?;
+                        }
+                        left = Rc::from(AstNode::Binary(
+                                BinaryAst {
+                                    op: token.tok.clone(),
+                                    left: left,
+                                    right: right,
+                                }
+                            ))
+
                     },
                     _ => {
-                        Err(CustomError::InvalidSyntax)
+                        return Err(CustomError::InvalidSyntax)
                     }
                     _=>{
-                        Err(CustomError::InvalidSyntax)
+                      return   Err(CustomError::InvalidSyntax)
                     }
                 }
             },
             None => {
-                Err(CustomError::InvalidSyntax)
+              return   Err(CustomError::InvalidSyntax)
             }
+        }
         }
     }
 

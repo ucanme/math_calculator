@@ -3,7 +3,7 @@ mod ast;
 mod error;
 
 fn main() {
-  let str = "12+2*3+3";
+  let str = "1+2*3+4+5";
     let p = lex::Parser{
         source: str.to_string(),
         ch: '1',
