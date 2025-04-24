@@ -2,7 +2,7 @@ use std::fmt::Error;
 use crate::error::error;
 use crate::error::error::CustomError;
 #[derive(Debug)]
-enum TokenType {
+pub enum TokenType {
     IDENTIFIER,
     LITERAL,
     OPERATOR,
@@ -11,9 +11,9 @@ enum TokenType {
 #[derive(Debug)]
 pub struct  Token  {
     // raw characters
-    tok: String,
+    pub(crate) tok: String,
     // type with Literal/Operator
-    tok_type: TokenType,
+    pub(crate) tok_type: TokenType,
     flag : i8,
     offset: i16
 }
@@ -80,10 +80,11 @@ impl Parser {
         if self.ch.is_ascii_alphabetic(){
             let mut tok = String::new();
             tok.push(self.ch);
-            while  self.ch.is_ascii_alphabetic() && self.next_ch().is_ok() {
+            while self.next_ch().is_ok() &&  self.ch.is_ascii_lowercase() {
+                println!("self---{}",self.ch);
                 tok.push(self.ch);
-                break;
             }
+            println!("---{}",tok);
             return Ok(Token{
                 tok: tok,
                 tok_type: TokenType::IDENTIFIER,

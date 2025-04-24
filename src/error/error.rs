@@ -12,5 +12,8 @@ pub enum CustomError {
     #[error("invalid offset")]
     InvalidOffset,
     #[error("unknow char {0}")]
-    UnknowChar(String)
+    UnknowChar(String),
+    #[error("invalid syntax")]
+    InvalidSyntax
+
 }
