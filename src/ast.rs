@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::f32::consts::E;
+use std::fmt::Alignment::Left;
 use std::rc::Rc;
 use std::thread::sleep;
 use crate::lex::{Parser, Token, TokenType};
@@ -67,28 +68,36 @@ impl<'a> Ast<'a> {
         right
     }
 
-    pub fn parse_op(&mut self,mut priority: i8,mut left:  Rc<AstNode>)-> Result<Rc<AstNode>,CustomError>{
+    pub fn parse_op(&mut self, priority: i8,mut left:  Rc<AstNode>)-> Result<Rc<AstNode>,CustomError>{
         loop{
-            println!("---left--- {:?}", left);
         let op = self.curr_tok;
+            println!("left {:?}", left);
         match op {
             Some(token) => {
                 match token.tok_type {
                     TokenType::OPERATOR => {
-                        let cur_priority = self.priority_map.get(&token.tok).ok_or(CustomError::InvalidSyntax)?;
-                        if cur_priority < &priority {
+
+                        let cur_priority =  {
+                            *self.priority_map.get(&token.tok).unwrap_or(&0)
+                        };
+
+
+                        println!("cur:{:?} {:?}", cur_priority, priority);
+                        if cur_priority < priority {
                             return Ok(left);
                         }
                         self.curr_idx += 1;
                         self.curr_tok = self.tokens.get(self.curr_idx);
-                        let mut right  = self.parse_primary()?;
+                        let mut right = self.parse_primary()?;
 
-                        let cur_priority = self.priority_map.get(&token.tok).ok_or(CustomError::InvalidSyntax)?;
-                        let next_priority = self.priority_map.get(&self.curr_tok.ok_or(CustomError::InvalidSyntax)?.tok).ok_or(CustomError::InvalidSyntax)?;
+                        println!("---right--- {:?}", right);
+                        // 再次提前计算不可变借用
+                        let next_priority = if let Some(next_token) = self.curr_tok {
+                            *self.priority_map.get(&next_token.tok).unwrap_or(&0)
+                        } else {
+                            0
+                        };
 
-                        println!("1 cur:{:?}",cur_priority);
-                        println!("2 next:{:?}", next_priority);
-                        println!("right {:?}", right);
                         if cur_priority < next_priority {
                             right = self.parse_op(cur_priority+1,right)?;
                         }
@@ -110,7 +119,7 @@ impl<'a> Ast<'a> {
                 }
             },
             None => {
-              return   Err(CustomError::InvalidSyntax)
+                return Ok(left)
             }
         }
         }

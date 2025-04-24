@@ -3,7 +3,7 @@ mod ast;
 mod error;
 
 fn main() {
-  let str = "1+2*3+4+5";
+  let str = "1+2*3+4";
     let p = lex::Parser{
         source: str.to_string(),
         ch: '1',
@@ -15,6 +15,14 @@ fn main() {
     match ast {
         Ok(mut ast) => {
             let result = ast.parse_expression();
+            match result {
+                Ok(node) => {
+                    println!("{:?}",node);
+                },
+                Err(e) => {
+                    println!("{:?}",e);
+                }
+            }
         },
         Err(e) => {
             println!("{:?}",e);
