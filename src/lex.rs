@@ -61,7 +61,6 @@ impl Parser {
         }
 
         let start = self.offset;
-
         if self.ch.is_digit(10){
             let mut num : u64 = self.ch.to_digit(10).unwrap() as u64;
             while self.next_ch().is_ok() && self.ch.is_digit(10) {
@@ -84,7 +83,6 @@ impl Parser {
                 println!("self---{}",self.ch);
                 tok.push(self.ch);
             }
-            println!("---{}",tok);
             return Ok(Token{
                 tok: tok,
                 tok_type: TokenType::IDENTIFIER,
@@ -104,6 +102,17 @@ impl Parser {
             return Ok(tok)
         }
         if self.ch == '(' || self.ch == ')' {
+            let tok =  Ok(Token{
+                tok: self.ch.to_string(),
+                tok_type: TokenType::OPERATOR,
+                flag: 0,
+                offset: start,
+            });
+            let _ = self.next_ch();
+            return tok
+        }
+
+        if self.ch == ',' {
             let tok =  Ok(Token{
                 tok: self.ch.to_string(),
                 tok_type: TokenType::COMMA,

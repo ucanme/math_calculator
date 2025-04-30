@@ -14,6 +14,7 @@ pub enum CustomError {
     #[error("unknow char {0}")]
     UnknowChar(String),
     #[error("invalid syntax")]
-    InvalidSyntax
-
+    InvalidSyntax,
+    #[error("func not exist {0}")]
+    FuncNotExist(String)
 }

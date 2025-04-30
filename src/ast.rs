@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::f32::consts::E;
 use std::fmt::Alignment::Left;
+use std::ptr::hash;
 use std::rc::Rc;
 use std::thread::sleep;
 use crate::lex::{Parser, Token, TokenType};
@@ -23,6 +24,52 @@ struct FunCallerAST {
     arg: Vec<Rc<AstNode>>,
 }
 
+
+
+#[derive(Debug)]
+pub struct Func {
+    argc: i8,
+    func:  fn(args: &[AstNode]) -> f64
+}
+
+
+fn func_min(args: &[AstNode])->f64{
+    return 0.0;
+}
+
+lazy_static::lazy_static! {
+    static ref HASH_MAP: HashMap<&'static str, Func> = HashMap::from([
+        ("min", Func { argc: 1, func: func_min }),
+        // 其他函数定义
+    ]);
+}
+
+fn get_func(name:&str) -> Option<&Func> {
+   HASH_MAP.get(name)
+}
+
+
+
+// defFunc = map[string]defS{
+// "sin": {1, defSin},
+// "cos": {1, defCos},
+// "tan": {1, defTan},
+// "cot": {1, defCot},
+// "sec": {1, defSec},
+// "csc": {1, defCsc},
+//
+// "abs":   {1, defAbs},
+// "ceil":  {1, defCeil},
+// "floor": {1, defFloor},
+// "round": {1, defRound},
+// "sqrt":  {1, defSqrt},
+// "cbrt":  {1, defCbrt},
+//
+// "noerr": {1, defNoerr},
+//
+// "max": {-1, defMax},
+// "min": {-1, defMin},
+// }
 #[derive(Debug)]
 pub enum AstNode {
     Number(NumberAst),
@@ -60,11 +107,12 @@ impl<'a> Ast<'a> {
     }
 
     /// 解析表达式
-    pub fn parse_expression(&mut self) -> Result<Rc<AstNode>, CustomError> {
+    pub fn  parse_expression(&mut self) -> Result<Rc<AstNode>, CustomError> {
         self.depth+=1;
         let left = self.parse_primary();
+        print!("left: {:?}",left);
         let right = self.parse_op(0,left?);
-        //println!("{:?}", right);
+        println!("right {:?}", right);
         right
     }
 
@@ -72,15 +120,14 @@ impl<'a> Ast<'a> {
         loop{
         let op = self.curr_tok;
             println!("left {:?}", left);
+            println!("op {:?}", op);
         match op {
             Some(token) => {
                 match token.tok_type {
                     TokenType::OPERATOR => {
-
                         let cur_priority =  {
-                            *self.priority_map.get(&token.tok).unwrap_or(&0)
+                            *self.priority_map.get(&token.tok).unwrap_or(&-1)
                         };
-
 
                         println!("cur:{:?} {:?}", cur_priority, priority);
                         if cur_priority < priority {
@@ -90,7 +137,6 @@ impl<'a> Ast<'a> {
                         self.curr_tok = self.tokens.get(self.curr_idx);
                         let mut right = self.parse_primary()?;
 
-                        println!("---right--- {:?}", right);
                         // 再次提前计算不可变借用
                         let next_priority = if let Some(next_token) = self.curr_tok {
                             *self.priority_map.get(&next_token.tok).unwrap_or(&0)
@@ -110,11 +156,11 @@ impl<'a> Ast<'a> {
                             ))
 
                     },
+                    TokenType::COMMA => {
+                        return Ok(left)
+                    },
                     _ => {
                         return Err(CustomError::InvalidSyntax)
-                    }
-                    _=>{
-                      return   Err(CustomError::InvalidSyntax)
                     }
                 }
             },
@@ -139,10 +185,29 @@ impl<'a> Ast<'a> {
                         Ok(Rc::new(AstNode::Number(num)))
                     },
                     TokenType::IDENTIFIER => {
-                        Err(CustomError::InvalidSyntax)
+                        let f=  self.parse_fn();
+                        println!("---f--- {:?}", f);
+                        f
                     },
-                    TokenType::COMMA => {
-                        Err(CustomError::InvalidSyntax)
+                    TokenType::OPERATOR => {
+                        if token.tok == "("{
+                            println!("parse_expression {:?}", token);
+                            self.curr_idx += 1;
+                            self.curr_tok = self.tokens.get(self.curr_idx);
+                            let e = self.parse_expression();
+                            println!("e {:?} {:?}", self.curr_tok, e);
+                            println!("{}", self.curr_tok.unwrap().tok);
+                            if self.curr_tok.unwrap().tok == ")"{
+                                self.curr_idx += 1;
+                                self.curr_tok = self.tokens.get(self.curr_idx);
+                                print!("self.curr_tok {:?}", self.curr_tok);
+                                Ok(e?)
+                            }else{
+                                return Err(CustomError::InvalidSyntax)
+                            }
+                        }else{
+                            Err(CustomError::InvalidSyntax)
+                        }
                     },
                     _ => {
                         Err(CustomError::InvalidSyntax)
@@ -155,4 +220,92 @@ impl<'a> Ast<'a> {
         }
     }
 
+    fn parse_fn(&mut self)-> Result<Rc<AstNode>,CustomError>{
+        println!("parse_fn {:?}", self.curr_tok);
+        match  self.curr_tok{
+            Some(token) => {
+                match token.tok_type {
+                    TokenType::IDENTIFIER => {
+                        let mut f = FunCallerAST{
+                            name: token.tok.to_string(),
+                            arg: vec![],
+                        };
+                        self.curr_idx += 1;
+                        self.curr_tok = self.tokens.get(self.curr_idx);
+                        match self.curr_tok {
+                            Some(token) => {
+
+                                match token.tok_type {
+                                    TokenType::OPERATOR => {
+                                        println!("token {:?}", token);
+                                        if token.tok == "("{
+                                            self.curr_idx += 1;
+                                            self.curr_tok = self.tokens.get(self.curr_idx);
+                                            println!("AAA---- {:?}", self.curr_tok);
+                                                match self.curr_tok {
+                                                    Some(token) => {
+                                                        let e = self.parse_expression();
+                                                        println!("---e-- {:?}", e);
+                                                        f.arg.push(e?);
+                                                        self.curr_idx += 1;
+                                                        self.curr_tok = self.tokens.get(self.curr_idx);
+                                                        loop {
+                                                            println!("---self.curr_tok {:?}", self.curr_tok);
+                                                            let token = self.curr_tok.unwrap();
+                                                            match token.tok_type {
+                                                                TokenType::COMMA => {
+                                                                    continue
+                                                                },
+                                                                TokenType::OPERATOR => {
+                                                                    println!("----sss----");
+                                                                    if token.tok == ")"{
+                                                                        self.curr_idx += 1;
+                                                                        self.curr_tok = self.tokens.get(self.curr_idx);
+                                                                        return Ok(Rc::new(AstNode::FunCaller(f)))
+                                                                    }else{
+                                                                        return Err(CustomError::InvalidSyntax)
+                                                                    }
+                                                                }
+                                                                _ => {
+                                                                    f.arg.push(self.parse_expression()?);
+                                                                    println!("parse_fn {:?}", f);
+
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    None => {
+                                                        return Err(CustomError::InvalidSyntax)
+                                                    }
+
+                                                }
+                                            println!("{}", self.curr_tok.unwrap().tok);
+                                        }
+                                        println!("{:?}", f);
+                                        return Ok(Rc::new(AstNode::FunCaller(f)))
+                                    }
+                                    _ => {}
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            _ => {}
+        }
+        Err(CustomError::InvalidSyntax)
+    }
+
+
+    fn next_token(&mut self) -> bool{
+        self.curr_idx += 1;
+        if self.curr_idx >= self.tokens.len() {
+           false
+        } else {
+            self.curr_tok = self.tokens.get(self.curr_idx);
+            true
+        }
+    }
 }
