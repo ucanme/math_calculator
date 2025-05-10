@@ -80,7 +80,6 @@ impl Parser {
             let mut tok = String::new();
             tok.push(self.ch);
             while self.next_ch().is_ok() &&  self.ch.is_ascii_lowercase() {
-                println!("self---{}",self.ch);
                 tok.push(self.ch);
             }
             return Ok(Token{

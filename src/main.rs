@@ -3,7 +3,7 @@ mod ast;
 mod error;
 
 fn main() {
-  let str = "min(1,2)*(3+4)+min(3,4)";
+  let str = "min(min(1,2)*(3+4),max(3,4))";
     let p = lex::Parser{
         source: str.to_string(),
         ch: 'm',
@@ -11,7 +11,6 @@ fn main() {
         error: Default::default(),
     };
    let result=p.parse().unwrap();
-    println!("{:?}",result);
     let ast = ast::Ast::new_ast(&result);
     match ast {
         Ok(mut ast) => {
