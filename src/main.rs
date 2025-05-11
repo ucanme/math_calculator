@@ -1,9 +1,10 @@
 mod lex;
 mod ast;
 mod error;
+mod exec;
 
 fn main() {
-  let str = "min(min(1,2)*(3+4),max(3,4))";
+  let str = "min(min(1,2)*(3+4),min(3,4))";
     let p = lex::Parser{
         source: str.to_string(),
         ch: 'm',
@@ -11,13 +12,15 @@ fn main() {
         error: Default::default(),
     };
    let result=p.parse().unwrap();
-    let ast = ast::Ast::new_ast(&result);
+    let ast = ast::Ast::new(result.as_slice());
     match ast {
         Ok(mut ast) => {
             let result = ast.parse_expression();
             match result {
                 Ok(node) => {
-                    println!("{:?}",node);
+                    println!("ast: {:?}",node);
+                    let val = exec::exec(&node);
+                    println!("val: {:?}",val)
                 },
                 Err(e) => {
                     println!("{:?}",e);

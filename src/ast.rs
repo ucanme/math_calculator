@@ -8,33 +8,40 @@ use crate::lex::{Parser, Token, TokenType};
 use crate::error::error::CustomError;
 
 #[derive(Debug)]
-struct NumberAst {
-    val: i64,
+pub struct NumberAst {
+    pub val: f64,
 }
 #[derive(Debug)]
-struct BinaryAst {
-    op: String,
-    left: Rc<AstNode>,
-    right: Rc<AstNode>,
+pub struct BinaryAst {
+   pub op: String,
+   pub left: Rc<AstNode>,
+   pub right: Rc<AstNode>,
 }
 
 #[derive(Debug)]
-struct FunCallerAST {
-    name: String,
-    arg: Vec<Rc<AstNode>>,
+pub struct FunCallerAST {
+    pub name: String,
+    pub arg: Vec<Rc<AstNode>>,
 }
 
 
 
 #[derive(Debug)]
 pub struct Func {
-    argc: i8,
-    func:  fn(args: &[AstNode]) -> f64
+   pub   argc: i8,
+   pub func:  fn(args: &[f64]) -> f64
 }
 
 
-fn func_min(args: &[AstNode])->f64{
-    return 0.0;
+fn func_min(args: &[f64])->f64{
+    println!("---MIN FUNC {} {:?}", args.len(), args);
+    let mut min = args[0];
+    args.iter().for_each(|x: &f64| {
+        if *x < min {
+            min = *x;
+        }
+    });
+    min
 }
 
 lazy_static::lazy_static! {
@@ -46,7 +53,7 @@ lazy_static::lazy_static! {
     ]);
 }
 
-fn get_func(name:&str) -> Option<&Func> {
+pub fn get_func(name:&str) -> Option<&Func> {
    HASH_MAP.get(name)
 }
 
@@ -66,8 +73,7 @@ pub struct Ast<'a> {
 }
 
 impl<'a> Ast<'a> {
-    /// 创建新的 Ast 实例
-    pub fn new_ast(tokens: &'a [Token]) -> Result<Self, CustomError> {
+    pub(crate) fn new(tokens: &'a [Token]) -> Result<Self, CustomError> {
         if tokens.is_empty() {
             return Err(CustomError::InvalidOffset);
         }
@@ -82,15 +88,16 @@ impl<'a> Ast<'a> {
                 ("*".to_string(), 40),
                 ("/".to_string(), 40),
                 ("%".to_string(), 40),
-            ]),
-        })
+            ]),})
     }
+
 
     /// 解析表达式
     pub fn  parse_expression(&mut self) -> Result<Rc<AstNode>, CustomError> {
         self.depth+=1;
         let left = self.parse_primary();
         let right = self.parse_op(0,left?);
+        self.depth-=1;
          right
     }
 
@@ -151,7 +158,7 @@ impl<'a> Ast<'a> {
                 match token.tok_type {
                     TokenType::LITERAL => {
                         let num = NumberAst {
-                            val: token.tok.parse::<i64>().unwrap(),
+                            val: token.tok.parse::<f64>().unwrap(),
                         };
                         self.next_token();
                         Ok(Rc::new(AstNode::Number(num)))
