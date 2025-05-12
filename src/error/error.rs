@@ -16,5 +16,7 @@ pub enum CustomError {
     #[error("invalid syntax")]
     InvalidSyntax,
     #[error("func not exist {0}")]
-    FuncNotExist(String)
+    FuncNotExist(String),
+    #[error("invalid operator")]
+    InvalidOperator(String),
 }

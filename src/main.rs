@@ -4,7 +4,7 @@ mod error;
 mod exec;
 
 fn main() {
-  let str = "min(min(1,2)*(3+4),min(3,4))";
+  let str = "min(min(1,2)*(3+4),min(3,4))+4.12";
     let p = lex::Parser{
         source: str.to_string(),
         ch: 'm',
@@ -18,9 +18,14 @@ fn main() {
             let result = ast.parse_expression();
             match result {
                 Ok(node) => {
-                    println!("ast: {:?}",node);
                     let val = exec::exec(&node);
-                    println!("val: {:?}",val)
+                    let formatted_num = format!("{:?}", val.unwrap());
+                    let trimmed = formatted_num.trim_end_matches('0');
+                    // 如果小数点后全是零，也去掉小数点
+                    let trimmed = trimmed.trim_end_matches('.');
+                    print!("expression : {} ,", str);
+                    println!("exec result: {}",trimmed);
+
                 },
                 Err(e) => {
                     println!("{:?}",e);

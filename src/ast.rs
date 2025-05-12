@@ -34,7 +34,6 @@ pub struct Func {
 
 
 fn func_min(args: &[f64])->f64{
-    println!("---MIN FUNC {} {:?}", args.len(), args);
     let mut min = args[0];
     args.iter().for_each(|x: &f64| {
         if *x < min {
@@ -130,8 +129,8 @@ impl<'a> Ast<'a> {
                         left = Rc::from(AstNode::Binary(
                                 BinaryAst {
                                     op: token.tok.clone(),
-                                    left: left,
-                                    right: right,
+                                    left,
+                                    right,
                                 }
                             ))
 

@@ -1,79 +1,55 @@
+use crate::ast::{AstNode, NumberAst, get_func};
+use crate::error::error::CustomError;
 use std::rc::Rc;
-use crate::ast::{get_func, AstNode, NumberAst};
 
-
-pub fn exec(ast_node: &AstNode) -> f64 {
+pub fn exec(ast_node: &AstNode) -> Result<f64, CustomError> {
     match ast_node {
-      AstNode::Number(num) => {
-            println!("exec1 {}",num.val);
-            return num.val;
-        }
+        AstNode::Number(num) => Ok(num.val),
         AstNode::Binary(binary) => {
-            let left =  binary.left.as_ref();
-            let right =  binary.right.as_ref();
-            println!("-----ast binary----- {:?} {:?}", binary, binary.op);
+            let left = binary.left.as_ref();
+            let right = binary.right.as_ref();
             match binary.op.as_str() {
-                "+" => {
-                    return exec(left) + exec(right);
-                }
-                "-" => {
-                    return exec(left) - exec(right);
-                }
-                "*" => {
-                    println!("--*-- {:?} {:?}", left, right);
-                    return exec(left) * exec(right);
-                }
-                "/" => {
-                    return exec(left) / exec(right);
-                }
-                "%" => {
-                    return exec(left) % exec(right);
-                }
-                _ =>{
-                    panic!("invalid operator");
-                }
+                "+" => Ok(exec(left)? + exec(right)?),
+                "-" => Ok(exec(left)? - exec(right)?),
+                "*" => Ok(exec(left)? * exec(right)?),
+                "/" => Ok(exec(left)? / exec(right)?),
+                "%" => Ok(exec(left)? % exec(right)?),
+                _ => Err(CustomError::InvalidOperator(binary.op.to_string())),
             }
         }
         AstNode::FunCaller(fun) => {
             let func = get_func(&fun.name);
-            println!("---func--- {:?}", func);
             match func {
                 Some(func) => {
                     let mut args: Vec<f64> = vec![];
-                    println!("---args--- {:?}", fun.arg);
-                   fun.arg.as_slice().as_ref().iter().for_each(|arg| {
-                       let t= arg.as_ref();
-                       match t {
-                           AstNode::Number(num) => {
-                               args.push(num.val);
-                           }
-                           AstNode::Binary(binary)=>{
-                               println!("---binary---{:?}", binary);
-                               let tmp = exec(arg);
-                               println!("---tmp---{}",tmp);
-                               args.push(tmp);
-                           }
+                    fun.arg.as_slice().as_ref().iter().try_for_each(
+                        |arg| -> Result<(), CustomError> {
+                            let t = arg.as_ref();
+                            match t {
+                                AstNode::Number(num) => {
+                                    args.push(num.val);
+                                    Ok(())
+                                }
+                                AstNode::Binary(binary) => {
+                                    let tmp = exec(arg)?;
+                                    args.push(tmp);
+                                    Ok(())
+                                }
 
-                           AstNode::FunCaller(fun)=>{
-                               let tmp = exec(arg);
-                               args.push(tmp);
-                           }
-                       }
-
-                   });
+                                AstNode::FunCaller(fun) => {
+                                    let tmp = exec(arg)?;
+                                    args.push(tmp);
+                                    Ok(())
+                                }
+                            }
+                        },
+                    )?;
                     let val = (func.func)(args.as_slice());
-                    println!("---val---{}",val);
-                    val
+                    Ok(val)
                 }
-                None => {
-                    println!("func not exist {}",fun.name);
-                    0.0
-                }
+                None => Ok(0.0),
             }
         }
-        _ => {
-            println!("invalid ast node");
-            0.0
-        }
+        _ => Ok(0.0),
     }
-    }
+}

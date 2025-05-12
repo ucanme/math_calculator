@@ -61,15 +61,32 @@ impl Parser {
         }
 
         let start = self.offset;
+
         if self.ch.is_digit(10){
             let mut num : u64 = self.ch.to_digit(10).unwrap() as u64;
+            let mut num_str = self.ch.to_string();
             while self.next_ch().is_ok() && self.ch.is_digit(10) {
                 let tmp : u64 = self.ch.to_digit(10).unwrap() as u64;
                 num = num*10 + tmp;
+                num_str.push(self.ch);
+            }
+            let mut fval: f64=  num as f64;
+            if self.ch == '.'{
+                num_str.push(self.ch);
+                let mut i:u64 = 10;
+                while self.next_ch().is_ok() && self.ch.is_digit(10) {
+                    num_str.push(self.ch);
+                    let tmp : u64 = self.ch.to_digit(10).unwrap() as u64;
+                    fval = fval+(tmp as f64/i as f64) as f64;
+                    i*=10
+                }
             }
 
+
+            //将fval计算为小数
+
             return Ok(Token{
-                tok: num.to_string(),
+                tok: num_str.to_string(),
                 tok_type: TokenType::LITERAL,
                 flag: 0,
                 offset: start,

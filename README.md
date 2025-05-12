@@ -100,23 +100,23 @@ e.g
   // double is register function name.
   // 1 is a number of parameter signatures. should be -1, 0, or a positive integer
   // func(expr ...engine.ExprAST) float64 is your function.
-  engine.RegFunction("double", 1, func(expr ...engine.ExprAST) float64 {
-    // when argc > 0，you can use the index value directly according to the number of parameters
-    // without worrying about crossing the boundary.
-    // use ExprASTResult to get the result of the ExprAST structure.
-    return engine.ExprASTResult(expr[0]) * 2
-  })
+  // engine.RegFunction("double", 1, func(expr ...engine.ExprAST) float64 {
+  //   // // when argc > 0，you can use the index value directly according to the number of parameters
+  //   // // without worrying about crossing the boundary.
+  //   // // use ExprASTResult to get the result of the ExprAST structure.
+  //   // return engine.ExprASTResult(expr[0]) * 2
+  // })
 ```
 
 然后你就可以在输入的表达式中使用这个函数 `double`:
 
 ```rust
 //exp := "double(6) + 2"
-r, err := engine.ParseAndExec("double(6) + 2")
-if err != nil {
-  panic(err)
-}
-fmt.Printf("double(6) + 2 = %f\n", r) // will print ： double(6) + 2 = 14.000000
+// r, err := engine.ParseAndExec("double(6) + 2")
+// if err != nil {
+//   panic(err)
+// }
+// fmt.Printf("double(6) + 2 = %f\n", r) // will print ： double(6) + 2 = 14.000000
 ```
 
 注意事项：
@@ -129,19 +129,12 @@ fmt.Printf("double(6) + 2 = %f\n", r) // will print ： double(6) + 2 = 14.00000
 
 go version 1.12
 ```rust
-# Compile Demo
-go test
-go build
-./math-engine
 ```
 
-也可以直接下载已编译好的二进制文件，直接运行：
 
-[Github Releases](https://github.com/dengsgo/math-engine/releases)
+
 
 ## 实现细节
-
-请阅读我的博客文章：[用 Go 实现一个完整的数学表达式计算引擎](https://www.yoytang.com/math-expression-engine.html)
 
 ## TODO
 ### 已实现
