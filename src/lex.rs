@@ -27,6 +27,18 @@ pub struct Parser {
 }
 impl Parser {
     //noinspection RsBorrowChecker
+    pub fn new(source: String) -> Result<Parser,CustomError> {
+        if source.is_empty(){
+            Err(CustomError::EmptySource)?
+        }
+        let b = source.as_bytes()[0];
+        Ok(Parser {
+            source,
+            ch: b  as char,
+            offset: 0,
+            error: Error::default(),
+        })
+    }
     pub fn parse(mut self) -> Result<Vec<Token>, CustomError>{
         let mut vec:Vec<Token> = Vec::new();
         loop {
@@ -107,7 +119,7 @@ impl Parser {
             })
         }
 
-        if self.ch == '+' || self.ch == '-' || self.ch == '*' || self.ch == '%' || self.ch == '/' {
+        if self.ch == '+' || self.ch == '-' || self.ch == '*' || self.ch == '%' || self.ch == '/' || self.ch == '^' {
             let tok = Token{
                 tok: self.ch.to_string(),
                 tok_type: TokenType::OPERATOR,

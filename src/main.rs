@@ -4,14 +4,9 @@ mod error;
 mod exec;
 
 fn main() {
-  let str = "min(min(1,2)*(3+4),min(3,4))+4.12";
-    let p = lex::Parser{
-        source: str.to_string(),
-        ch: 'm',
-        offset: 0,
-        error: Default::default(),
-    };
-   let result=p.parse().unwrap();
+    let str = "1+2*6/4+(456-8*9.2)-(2+4^5)";
+    let p = lex::Parser::new(str.to_string()).unwrap();
+    let result=p.parse().unwrap();
     let ast = ast::Ast::new(result.as_slice());
     match ast {
         Ok(mut ast) => {

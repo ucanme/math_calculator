@@ -14,6 +14,7 @@ pub fn exec(ast_node: &AstNode) -> Result<f64, CustomError> {
                 "*" => Ok(exec(left)? * exec(right)?),
                 "/" => Ok(exec(left)? / exec(right)?),
                 "%" => Ok(exec(left)? % exec(right)?),
+                "^" => Ok(exec(left)?.powf(exec(right)?)),
                 _ => Err(CustomError::InvalidOperator(binary.op.to_string())),
             }
         }

@@ -19,4 +19,6 @@ pub enum CustomError {
     FuncNotExist(String),
     #[error("invalid operator")]
     InvalidOperator(String),
+    #[error("invalid argument")]
+    EmptySource
 }

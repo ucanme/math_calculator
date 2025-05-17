@@ -43,10 +43,20 @@ fn func_min(args: &[f64])->f64{
     min
 }
 
+fn func_max(args: &[f64])-> f64{
+    let mut max = args[0];
+    args.iter().for_each(|x: &f64| {
+        if *x > max {
+            max = *x;
+        }
+    });
+    max
+}
+
 lazy_static::lazy_static! {
     static ref HASH_MAP: HashMap<&'static str, Func> = HashMap::from([
         ("min", Func { argc: 1, func: func_min }),
-        ("max", Func { argc: 1, func: func_min }),
+        ("max", Func { argc: 1, func: func_max }),
 
         // 其他函数定义
     ]);
@@ -87,6 +97,7 @@ impl<'a> Ast<'a> {
                 ("*".to_string(), 40),
                 ("/".to_string(), 40),
                 ("%".to_string(), 40),
+                ("^".to_string(), 50),
             ]),})
     }
 
@@ -176,10 +187,33 @@ impl<'a> Ast<'a> {
                             if self.curr_tok.unwrap().tok == ")"{
                                 self.next_token();
                                 Ok(e?)
-                            }else{
+                            }  else{
                                 return Err(CustomError::InvalidSyntax)
                             }
-                        }else{
+                        }else if token.tok == "-"{
+                            self.next_token();
+                            match self.curr_tok {
+                                Some(token) => {
+                                    match token.tok_type {
+                                        TokenType::LITERAL => {
+                                            let num = NumberAst {
+                                                val: -token.tok.parse::<f64>().unwrap(),
+                                            };
+                                            self.next_token();
+                                            Ok(Rc::new(AstNode::Number(num)))
+                                        },
+                                        _ => {
+                                            Err(CustomError::InvalidSyntax)
+                                        }
+                                    }
+                                }
+                                None => {
+                                    Err(CustomError::InvalidSyntax)
+                                }
+                            }
+
+                        }
+                        else{
                             Err(CustomError::InvalidSyntax)
                         }
                     },
