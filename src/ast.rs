@@ -138,6 +138,7 @@ pub enum AstNode {
     FunCaller(FunCallerAST),
 }
 
+#[derive(Debug)]
 pub struct Ast<'a> {
     tokens: &'a [Token],       // 使用切片引用，避免所有权转移
     curr_tok: Option<&'a Token>, // 当前 token，使用引用并支持空值

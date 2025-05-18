@@ -85,9 +85,11 @@ e.g. 2 高级用法： 依次调用函数，手动执行 :
 ```
 编译运行，应该可以看到如下输出：
 ```bash
-ExprAST: {Op:- Lhs:{Op:+ Lhs:{Op:+ Lhs:{Val:1} Rhs:{Op:/ Lhs:{Op:* Lhs:{Val:2} Rhs:{Val:6}} Rhs:{Val:4}}} Rhs:{Op:- Lhs:{Val:456} Rhs:{Op:* Lhs:{Val:8} Rhs:{Val:9.2}}}} Rhs:{Op:+ Lhs:{Val:2} Rhs:{Op:^ Lhs:{Val:4} Rhs:{Val:5}}}}
-progressing ...  -639.6
-1+2*6/4+(456-8*9.2)-(2+4^5) = -639.6
+expression : 123+89-0.9 ,
+ast tree: Ast { tokens: [Token { tok: "123", tok_type: LITERAL, flag: 0, offset: 0 }, Token { tok: "+", tok_type: OPERATOR, flag: 0, offset: 3 }, Token { tok: "89", tok_type: LITERAL, flag: 0, offset: 4 }, Token { tok: "-", tok_type: OPERATOR, flag: 0, offset: 6 }, Token { tok: "0.9", tok_type: LITERAL, flag: 0, offset: 7 }], curr_tok: Some(Token { tok: "123", tok_type: LITERAL, flag: 0, offset: 0 }), curr_idx: 0, depth: 0, priority_map: {"+": 1, "-": 1, "*": 40, "%": 40, "^": 50, "/": 40} }
+expression : 123+89-0.9 ,
+exec result: 211.1
+
 ```
 
 ## TrigonometricMode

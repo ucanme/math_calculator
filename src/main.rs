@@ -4,12 +4,14 @@ mod error;
 mod exec;
 
 fn main() {
-    let str = "123+89-0.0.9";
+    let str = "123+89-0.9";
+    println!("expression : {} ,", str);
     let p = lex::Parser::new(str.to_string()).unwrap();
     let result=p.parse().unwrap();
     let ast = ast::Ast::new(result.as_slice());
     match ast {
         Ok(mut ast) => {
+            println!("ast tree: {:?}",ast);
             let result = ast.parse_expression();
             match result {
                 Ok(node) => {
@@ -18,7 +20,7 @@ fn main() {
                     let trimmed = formatted_num.trim_end_matches('0');
                     // 如果小数点后全是零，也去掉小数点
                     let trimmed = trimmed.trim_end_matches('.');
-                    print!("expression : {} ,", str);
+                    println!("expression : {} ,", str);
                     println!("exec result: {}",trimmed);
 
                 },
