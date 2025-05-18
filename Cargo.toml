@@ -2,6 +2,8 @@
 name = "math_calculator"
 version = "0.1.0"
 edition = "2024"
+description = "a lib with math expr ast build and exec"
+license = "MIT"
 
 [dependencies]
 thiserror = "2.0.12"
