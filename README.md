@@ -50,14 +50,27 @@
 
 
 ## Usage
+### 直接clone本地运行
+```git 
+git clone git@github.com:ucanme/math_calculator.git
+```
+或
+```git
+git clone https://github.com/ucanme/math_calculator.git
+```
+在表达式src/main.rs中(可以直接修改表达式), 直接执行
+```shell
+cargo run
+```
 
-你可以直接引用该库嵌入到自己的程序中：
-```bash
 
+### 你可以直接引用该库嵌入到自己的程序中，添加依赖：
+```toml
+math_calculator = "0.1.0"
 ```
 在代码中引入：
 ```
-
+use math_calculator.{}
 ```
 e.g. 1 常规用法： 直接调用解析执行函数 :
 
@@ -123,9 +136,8 @@ e.g
 - 注册的函数逻辑中如果有 panic ，需要程序自己捕获处理;
 - argc=-1，即该函数的参数是可变的，expr 的长度需要开发者自行逻辑判断处理；
 
-## Compile
 
-go version 1.12
+## Compile
 ```rust
 ```
 
@@ -155,10 +167,5 @@ go version 1.12
 - [x] 友好的错误消息 e.g.
 ```bash
 input /> 123+89-0.0.9
-ERROR: strconv.ParseFloat: parsing "0.0.9": invalid syntax
-want '(' or '0-9' but get '0.0.9'
-------------
-123+89-0.0.9
-       ^
-------------
+called `Result::unwrap()` on an `Err` value: UnknowChar(".")
 ```
