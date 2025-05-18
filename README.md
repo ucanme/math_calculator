@@ -169,3 +169,5 @@ e.g
 input /> 123+89-0.0.9
 called `Result::unwrap()` on an `Err` value: UnknowChar(".")
 ```
+
+# 该项目参考go项目 https://github.com/dengsgo/math-engine
