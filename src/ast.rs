@@ -53,10 +53,75 @@ fn func_max(args: &[f64])-> f64{
     max
 }
 
+fn func_abs(args: &[f64])-> f64{
+    args[0].abs()
+}
+fn func_sqrt(args: &[f64])-> f64{
+    args[0].sqrt()
+}
+fn func_exp(args: &[f64])-> f64{
+    args[0].exp()
+}
+fn func_log(args: &[f64])-> f64{
+    args[0].ln()
+}
+fn func_sin(args: &[f64])-> f64{
+    args[0].sin()
+}
+fn func_cos(args: &[f64])-> f64{
+    args[0].cos()
+}
+fn func_tan(args: &[f64])-> f64{
+    args[0].tan()
+}
+fn func_asin(args: &[f64])-> f64{
+    args[0].asin()
+}
+
+fn func_acos(args: &[f64])-> f64{
+    args[0].acos()
+}
+fn func_atan(args: &[f64])-> f64{
+    args[0].atan()
+}
+fn func_atan2(args: &[f64])-> f64{
+    args[0].atan2(args[1])
+}
+fn func_pow(args: &[f64])-> f64{
+    args[0].powf(args[1])
+}
+fn func_log10(args: &[f64])-> f64{
+    args[0].log10()
+}
+
+fn func_floor(args: &[f64])-> f64{
+    args[0].floor()
+}
+fn func_ceil(args: &[f64])-> f64{
+    args[0].ceil()
+}
+
+
+
 lazy_static::lazy_static! {
     static ref HASH_MAP: HashMap<&'static str, Func> = HashMap::from([
         ("min", Func { argc: 1, func: func_min }),
         ("max", Func { argc: 1, func: func_max }),
+        ("abs", Func { argc: 1, func: func_abs }),
+        ("floor", Func { argc: 1, func: func_floor }),
+        ("ceil", Func { argc: 1, func: func_ceil }),
+        ("sqrt", Func { argc: 1, func: func_sqrt }),
+        ("exp", Func { argc: 1, func: func_exp }),
+        ("log", Func { argc: 1, func: func_log }),
+        ("log10", Func { argc: 1, func: func_log10 }),
+        ("sin", Func { argc: 1, func: func_sin }),
+        ("cos", Func { argc: 1, func: func_cos }),
+        ("tan", Func { argc: 1, func: func_tan }),
+        ("asin", Func { argc: 1, func: func_asin }),
+        ("acos", Func { argc: 1, func: func_acos }),
+        ("atan", Func { argc: 1, func: func_atan }),
+        ("atan2", Func { argc: 2, func: func_atan2}),
+        ("pow", Func { argc: 2, func: func_pow }),
 
         // 其他函数定义
     ]);

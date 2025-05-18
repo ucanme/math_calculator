@@ -4,7 +4,7 @@ mod error;
 mod exec;
 
 fn main() {
-    let str = "1+2*6/4+(456-8*9.2)-(2+4^5)";
+    let str = "max(min(2^3, 3^2), 10*1.5-7)";
     let p = lex::Parser::new(str.to_string()).unwrap();
     let result=p.parse().unwrap();
     let ast = ast::Ast::new(result.as_slice());
